@@ -1,6 +1,6 @@
 
 from solver import *
-import Queue
+from collections import deque
 
 class SolverDFS(UninformedSolver):
     def __init__(self, gameMaster, victoryCondition):
@@ -34,12 +34,11 @@ class SolverDFS(UninformedSolver):
                 next_state = GameState(self.gm.getGameState(), current_state.depth + 1, movable)
 
                 #self.visited[next_state] = False
-                # if current_state.parent is not None and next_state.state == current_state.parent.state:
-                #     #if making this move would result in the parent state
-                #     self.gm.reverseMove(movable)
-                #     continue
-                # if next_state in self.visited:
-                #     continue
+                if current_state.parent is not None and next_state.state == current_state.parent.state:
+                     #if making this move would result in the parent state
+                     self.gm.reverseMove(movable)
+                     continue
+
                 next_state.parent = current_state
                 current_state.children.append(next_state)
                 self.gm.reverseMove(movable)
@@ -63,6 +62,7 @@ class SolverDFS(UninformedSolver):
 class SolverBFS(UninformedSolver):
     def __init__(self, gameMaster, victoryCondition):
         super().__init__(gameMaster, victoryCondition)
+        self.states = deque()
 
     def solveOneStep(self):
         """
@@ -78,27 +78,47 @@ class SolverBFS(UninformedSolver):
             True if the desired solution state is reached, False otherwise
         """
         ### Student code goes here
-
-        states = Queue()
+        self.visited[self.currentState] = True
         if self.currentState.state == self.victoryCondition:
             return True
 
-        self.visited[self.currentState] = True
-
         movables = self.gm.getMovables()
         current_state = self.currentState
-
-        if movables:
+        if not current_state.children:  #add children to the current node
             for movable in movables:
                 self.gm.makeMove(movable)
                 next_state = GameState(self.gm.getGameState(), current_state.depth + 1, movable)
-                next_state.parent = current_state
-                current_state.children.append(next_state)
-                states.put(next_state)
-                self.gm.reverseMove()
+                if next_state not in self.visited:
+                    next_state.parent = current_state
+                    current_state.children.append(next_state)
+                self.gm.reverseMove(movable)
 
-            while states:
-                
+        for child in current_state.children:
+            if child not in self.visited and child not in self.states:
+                self.states.append(child)  #add children to the queue to be processed in BFS order
 
+        next_state = self.states.popleft()
+        path = deque()
+        temp_state = next_state
+
+        while temp_state.parent is not None:
+            path.append(temp_state.requiredMovable)    #create the path to get from root to the new state
+            temp_state = temp_state.parent
+
+        # need to move back to the root from wherever we are
+        while self.currentState.parent is not None:
+            self.gm.reverseMove(self.currentState.requiredMovable)
+            self.currentState = self.currentState.parent
+
+        while path:
+            self.gm.makeMove(path.pop())
+
+        self.currentState = next_state
+
+        if self.currentState.state == self.victoryCondition:
+            return True
         else:
             return False
+
+
+
