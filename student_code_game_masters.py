@@ -83,6 +83,7 @@ class TowerOfHanoiGame(GameMaster):
         self.kb.kb_retract(parse_input("fact: (on " + disk + " " + initial + ")"))
         self.kb.kb_add(parse_input("fact: (on " + disk + " " + target + ")"))
 
+        #updates facts regarding state of target peg
         if not game_state[target_num-1]:
             self.kb.kb_retract(parse_input("fact: (empty " +target+ ")"))
         else:
@@ -92,6 +93,7 @@ class TowerOfHanoiGame(GameMaster):
         self.kb.kb_add(parse_input("fact: (onTop " + disk + " " + target + ")"))
         self.kb.kb_retract(parse_input("fact: (onTop " + disk + " " + initial + ")"))
 
+        #updates facts regarding state of initial peg
         game_state = self.getGameState()
         if not game_state[initial_num-1]:
             self.kb.kb_add(parse_input("fact: (empty " + initial + ")"))

@@ -28,9 +28,7 @@ fact: (pos tile7 pos1 pos3)
 fact: (pos tile8 pos3 pos2)
 fact: (pos empty pos3 pos1)
 
-rule: ((pos ?a ?x ?y)(pos ?b ?x pos2)) -> (adjacent ?a ?b)
-rule: ((pos ?a ?x pos2)(pos ?b ?x ?y)) -> (adjacent ?a ?b)
-rule: ((pos ?a ?x ?y)(pos ?b pos2 ?y)) -> (adjacent ?a ?b)
-rule: ((pos ?a pos2 ?y)(pos ?b ?x ?y)) -> (adjacent ?a ?b)
-
-rule: ((pos ?a ?x ?y)(pos empty ?w ?z)(adjacent ?a empty)) -> (movable ?a ?x ?y ?w ?z)
+rule: ((pos ?tile ?x pos2)(pos empty ?x ?y)) -> (movable ?tile ?x pos2 ?x ?y)
+rule: ((pos ?tile pos2 ?y)(pos empty ?x ?y)) -> (movable ?tile pos2 ?y ?x ?y)
+rule: ((pos empty ?x pos2)(pos ?tile ?x ?y)) -> (movable ?tile ?x ?y ?x pos2)
+rule: ((pos empty pos2 ?y)(pos ?tile ?x ?y)) -> (movable ?tile ?x ?y pos2 ?y)

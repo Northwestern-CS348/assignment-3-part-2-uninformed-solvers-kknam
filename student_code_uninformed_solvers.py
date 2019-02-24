@@ -32,26 +32,20 @@ class SolverDFS(UninformedSolver):
             for movable in movables:
                 self.gm.makeMove(movable)
                 next_state = GameState(self.gm.getGameState(), current_state.depth + 1, movable)
-
-                #self.visited[next_state] = False
-                if current_state.parent is not None and next_state.state == current_state.parent.state:
-                     #if making this move would result in the parent state
-                     self.gm.reverseMove(movable)
-                     continue
-
-                next_state.parent = current_state
-                current_state.children.append(next_state)
+                if next_state not in self.visited:  #add children to the current node
+                    next_state.parent = current_state
+                    current_state.children.append(next_state)
                 self.gm.reverseMove(movable)
 
             while current_state.nextChildToVisit < len(current_state.children):
                 next_state = current_state.children[current_state.nextChildToVisit]
-                if next_state not in self.visited:
+                if next_state not in self.visited:  #makes move to child at lower depth
                     current_state.nextChildToVisit += 1
                     self.visited[next_state] = True
                     self.gm.makeMove(next_state.requiredMovable)
                     self.currentState = next_state
                     break
-                else:
+                else:   #proceeds horizontally to next child at same level
                     current_state.nextChildToVisit += 1
 
         else:
@@ -90,11 +84,12 @@ class SolverBFS(UninformedSolver):
                 next_state = GameState(self.gm.getGameState(), current_state.depth + 1, movable)
                 if next_state not in self.visited:
                     next_state.parent = current_state
+                    self.visited[next_state] = False
                     current_state.children.append(next_state)
                 self.gm.reverseMove(movable)
 
         for child in current_state.children:
-            if child not in self.visited and child not in self.states:
+            if not self.visited[child] and child not in self.states:
                 self.states.append(child)  #add children to the queue to be processed in BFS order
 
         next_state = self.states.popleft()
@@ -110,6 +105,7 @@ class SolverBFS(UninformedSolver):
             self.gm.reverseMove(self.currentState.requiredMovable)
             self.currentState = self.currentState.parent
 
+        #move to next state from root
         while path:
             self.gm.makeMove(path.pop())
 
